@@ -10,7 +10,6 @@ with the later version of GTK2 and of course with GTK3 .
 
 So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is. 
 
-
 <b>Similarites with Kanjipad</b>
 
 * Almost the same user interface layout
@@ -22,9 +21,8 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 * Code simplified and commented
 * JStroke is now integrated at compile time instead using a separate software
   (KanjiPad <-stdin-> KPengine <-linked-> Jstroke). At the cost UI / Engine full
-  separation, but at the benefic of a much more clear code.  
+  separation, but at the benefits of a much more clear code.  
 * More prettier, thanks to Cairo and GTK3 theme.
-
 
 
 <b>TODO</b>
@@ -36,3 +34,5 @@ I need some help for:
 * Add effects (brush, ...) using Cairo. 
 
   
+<i>Credits for the Kanjipad and JStroke softwares goes to the original author 
+and contributors. </i>
