@@ -26,11 +26,17 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 
 
 <b>TODO</b>
+
+* Remove some legacy Code from Kanjipad (datatype)
+* Undo functionnality
+* Annotate
+* Finish menu
+
+
 I need some help for:
 
-* Better drawing callback. Right now I redraw all the points at each draw. It
-  must be a better way (invalidate a rect like in kanjipad)
-
+* Better drawing callback. Right now I(s a bit laggy bevause all the strokes are redrawn at each invalidate
+  It must have a better way (invalidate a rect like in kanjipad)
 * Add effects (brush, ...) using Cairo. 
 
   
