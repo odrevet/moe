@@ -22,7 +22,7 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 * JStroke is now integrated at compile time instead using a separate software
   (KanjiPad <-stdin-> KPengine <-linked-> Jstroke). At the cost UI / Engine full
   separation, but at the benefits of a much more clear code.  
-* More prettier, thanks to Cairo and GTK3 theme.
+* Prettier, thanks to Cairo and GTK3 theme.
 
 
 <b>TODO</b>
