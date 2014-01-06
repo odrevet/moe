@@ -1,0 +1,39 @@
+Fri Sep 26 21:10:59 1997  Robert E. Wells  <robert@wellscs.com>
+
+	* scoring.c (StrokeScorerTopPicks): One-line fix to the SJIS code
+	calculation to avoid sign extension problems, and fix off by 0x100
+	problem with JStroke 1.1 that was reported by Peter Cumpson.
+
+Mon Sep 22 20:40:27 1997  Robert E. Wells  <robert@wellscs.com>
+
+	* scoring.c (StrokeScorerTopPicks): Added SJIS:HHHH notation to
+	list to give ShiftJIS codes suitable for entry into Canon
+	Wordtank, as requested by Peter Cumpson <pjc2@npl.co.uk>.
+
+	* *.[ch]: Merged in the changes made by Owen Taylor
+	<owt1@cornell.edu> to split the sources into a more modular set of
+	files, and isolate the Pilot dependencies.  Went a bit further and
+	broke out jstrpilot.h, maybe added another file or two myself.
+	Added emacs magic on top line to set mode nicely, adapted from
+	Owen's emacs magic at the bottom of the file.
+	
+Mon Sep 01 15:03:15 1997  Robert E. Wells  <robert@wellscs.com>
+
+	* readme.txt (http): Added header comment and GPL license
+	information, and expanded discussion of build methods, credits,
+	plans, links, etc.
+
+	* jstroke.c: Added header comment and GPL license information.
+
+	* jstroke.h: Added header comment and GPL license information.
+
+	* memowrite.c: Added header comment and GPL license information.
+
+	* memowrite.h: Added header comment and GPL license information.
+
+	* jstroke.rcp: Added header comment and GPL license information.
+
+	* compact.pl: Added header comment and GPL license information.
+
+	* kkindex.txt: Added header comment and GPL license information.
+
