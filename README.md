@@ -6,9 +6,9 @@ A GTK3 rewrite of KanjiPad, a Japanese Handwriting recognition software
 <b>Why rewrite kanjipad</b>
 
 Kanjipad is a great software, but it's also quit old and cannot be compiled
-with the later version of GTK2 and inthinkable with GTK3 .
+with the later version of GTK2 and of course with GTK3 .
 
-So I rewrite it using Glade and Xairo, keeping most of the engine as-is. 
+So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is. 
 
 
 <b>Similarites with Kanjipad</b>
