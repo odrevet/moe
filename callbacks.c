@@ -9,7 +9,7 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
   gint16 y;
   int i=1;
       
-  cairo_set_line_width(cr, 2);
+  cairo_set_line_width(cr, app->stroke_size);
 
   //if a stroke is being drawn, draw lines between all points of the current stroke
   if(app->instroke){
@@ -228,15 +228,28 @@ menuitem_preferences_activate_cb(GtkWidget *widget, App *app) {
 G_MODULE_EXPORT gboolean
 imagemenuitem_about_activate_cb(GtkWidget *widget, App *app) {
   GET_UI_ELEMENT(GtkAboutDialog, aboutdialog1);
-  
-  gint result = gtk_dialog_run(aboutdialog1);
-  switch (result){
-  case GTK_RESPONSE_ACCEPT:
-    break;
-  default:
-    
-    break;
-  }
+  gtk_dialog_run(aboutdialog1);
   gtk_widget_hide (aboutdialog1);
 }
 
+
+// Settings dialogue
+G_MODULE_EXPORT gboolean
+button_ok_clicked_cb(GtkWidget *widget, App *app) {
+  
+}
+
+G_MODULE_EXPORT gboolean
+colorbutton_background_color_set_cb(GtkWidget *widget, App *app) {
+  gtk_color_chooser_get_rgba(widget, app->background_color);
+}
+
+G_MODULE_EXPORT gboolean
+colorbutton_strokes_color_set_cb(GtkWidget *widget, App *app) {
+  gtk_color_chooser_get_rgba(widget, app->strokes_color);
+}
+
+G_MODULE_EXPORT gboolean
+colorbutton_curstroke_color_set_cb(GtkWidget *widget, App *app) {
+  gtk_color_chooser_get_rgba(widget, app->curstroke_color);
+}

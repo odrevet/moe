@@ -68,10 +68,20 @@ app_init (App * app)
   app->objects = gtk_builder_get_objects (app->definitions);
 
   app->instroke = FALSE;
+  
   app->annotate = FALSE;
+  app->auto_look_up = TRUE;
   
   app_init_colors (app);
 
+  app->stroke_size = 2;
+
+  //Set the guesses results font and size
+  GET_UI_ELEMENT(GtkBox, box_guesses);
+  PangoFontDescription    *fd = NULL;
+  fd = pango_font_description_from_string ("Monospace 16");
+  gtk_widget_modify_font (box_guesses, fd);
+ 
   load_database();
 }
 

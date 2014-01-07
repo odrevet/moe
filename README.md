@@ -27,11 +27,11 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 
 <b>TODO</b>
 
-* Color chooser menu for the strokes and background
 * set stroke width
 * Option to append several kanji in the clipboard / erase clipboard and push kanji (current)
 * Save settings
-* about dialog 
+* Guesses font and size option
+* use a surface as buffer instead of drawing directly to the draw area 
   
 <i>Credits for the Kanjipad and JStroke softwares goes to the original author 
-and contributors. </i>
+and contributors.</i>

@@ -21,6 +21,8 @@ typedef struct app_
   GdkRGBA *strokes_color;
   GdkRGBA *curstroke_color;
 
+  gint stroke_size;
+  
   gboolean annotate;
   gboolean auto_look_up;
 
