@@ -209,3 +209,34 @@ G_MODULE_EXPORT gboolean
 button_undo_clicked_cb(GtkWidget *widget, App *app) {
   undo_stroke(app);
 }
+
+G_MODULE_EXPORT gboolean
+menuitem_preferences_activate_cb(GtkWidget *widget, App *app) {
+  GET_UI_ELEMENT(GtkDialog, dialog_settings);
+  gint result = gtk_dialog_run(dialog_settings);
+
+  switch (result){
+  case GTK_RESPONSE_ACCEPT:
+    break;
+  default:
+    
+    break;
+  }
+  gtk_widget_hide (dialog_settings);  
+}
+
+G_MODULE_EXPORT gboolean
+imagemenuitem_about_activate_cb(GtkWidget *widget, App *app) {
+  GET_UI_ELEMENT(GtkAboutDialog, aboutdialog1);
+  
+  gint result = gtk_dialog_run(aboutdialog1);
+  switch (result){
+  case GTK_RESPONSE_ACCEPT:
+    break;
+  default:
+    
+    break;
+  }
+  gtk_widget_hide (aboutdialog1);
+}
+
