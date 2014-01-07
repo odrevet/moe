@@ -51,15 +51,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem_copy">
-                        <property name="label">gtk-copy</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkMenuItem" id="menuitem_clear">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -98,6 +89,15 @@
                         <property name="label" translatable="yes">Auto Lookup</property>
                         <property name="use_underline">True</property>
                         <signal name="toggled" handler="menuitem_auto_lookup_toggled_cb" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckMenuItem" id="menuitem_annotate">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Annotate</property>
+                        <property name="use_underline">True</property>
+                        <signal name="toggled" handler="menuitem_annotate_toggled_cb" swapped="no"/>
                       </object>
                     </child>
                   </object>

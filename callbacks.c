@@ -86,6 +86,7 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
   GList *stroke_list;
   gint16 x;
   gint16 y;
+  int i=1;
       
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_set_line_width(cr, 2);
@@ -114,10 +115,24 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
   stroke_list = app->strokes;
   while (stroke_list){
     GList *point_list = stroke_list->data;
-    while (point_list){
+
+    //if annotate, display the stroke number near the first point
+    if(app->annotate){
       x = ((GdkPoint *)point_list->data)->x;
       y = ((GdkPoint *)point_list->data)->y;
+    
 
+      cairo_move_to(cr, x - 10, y - 10);
+      gchar stroke_number[2];             //no kanji stroke count with more than 2 digits
+      sprintf(stroke_number, "%d", i);
+      cairo_show_text(cr, stroke_number);
+    }
+    
+    while (point_list){
+
+      x = ((GdkPoint *)point_list->data)->x;
+      y = ((GdkPoint *)point_list->data)->y;
+      
       cairo_move_to(cr, x, y);
       point_list = point_list->next;
 
@@ -128,6 +143,7 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
       }
     }
     stroke_list = stroke_list->next;
+    i++;
   }
   cairo_stroke(cr);
   
@@ -254,9 +270,18 @@ menuitem_lookup_activate_cb(GtkWidget *widget, App *app) {
   look_up(app);
 }
 
+G_MODULE_EXPORT gboolean
+menuitem_annotate_toggled_cb(GtkWidget *widget, App *app) {
+  gboolean annotate = gtk_check_menu_item_get_active(widget);
+  app->annotate = annotate;
+
+  //redraw the graph drawing area
+  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
+  gtk_widget_queue_draw(drawingarea_kanji);  
+}
 
 G_MODULE_EXPORT gboolean
 menuitem_clear_activate_cb(GtkWidget *widget, App *app) {
-  
+  button_erase_clicked_cb(widget, app);
 }
 
