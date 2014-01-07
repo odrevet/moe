@@ -70,10 +70,6 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
     i++;
   }
   cairo_stroke(cr);
-  
-  
-  gdk_cairo_set_source_rgba (cr, app->background_color);
-  cairo_fill (cr);
 
   return FALSE;  
 }

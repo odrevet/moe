@@ -23,17 +23,26 @@ app_get_ui_element (App * app, const gchar * name)
 void
 app_init_colors (App * app)
 {
-  GdkRGBA background_color = { 1, 1, 0, 1 };
-  GdkRGBA strokes_color = { 0, 0, 0, 1 };
-  GdkRGBA curstroke_color = { .75, .25, .25, 1 };
-    
   app->background_color = g_new0 (GdkRGBA, 1);
   app->strokes_color = g_new0 (GdkRGBA, 1);
   app->curstroke_color = g_new0 (GdkRGBA, 1);
+  
+  //if no custom colors saved, fetch system colors
+  GET_UI_ELEMENT (GtkWidget, window1);
+  GtkStyleContext *context;
+  context = gtk_widget_get_style_context (window1);
 
-  app->background_color = gdk_rgba_copy (&background_color);
-  app->strokes_color = gdk_rgba_copy (&strokes_color);
-  app->curstroke_color = gdk_rgba_copy (&curstroke_color);
+  gtk_style_context_get_background_color(context,
+					 GTK_STATE_FLAG_NORMAL,
+					 app->background_color);
+
+  gtk_style_context_get_color(context,
+			      GTK_STATE_FLAG_NORMAL,
+			      app->strokes_color);
+
+  gtk_style_context_get_background_color(context,
+					 GTK_STATE_FLAG_SELECTED,
+					 app->curstroke_color);
 }
     
 void
