@@ -1,84 +1,5 @@
 #include "app.h"
 
-typedef struct {
-  gchar d[2];
-} kp_wchar;
-
-static gchar *
-utf8_for_char (unsigned char ch[2])
-{
-  gchar *string_utf;
-  GError *err = NULL;
-  gchar str[3];
-
-  str[0] = ch[0] + 0x80;
-  str[1] = ch[1] + 0x80;
-  str[2] = 0;
-
-  string_utf = g_convert (str, -1, "UTF-8", "EUC-JP", NULL, NULL, &err);
-  if (!string_utf)
-    {
-      g_printerr ("Cannot convert string from EUC-JP to UTF-8: %s\n",
-		  err->message);
-      exit (1);
-    }
-
-  return string_utf;
-}
-
-void button_kanji_clicked (GtkWidget *widget, App *app){
-
-  gchar* label = gtk_button_get_label(widget);
-  g_print("%s", label);  //print the kanji to stdout
-
-  //copy the kanji to the clipboard
-  GtkClipboard *clipboard;
-  clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-  gtk_clipboard_clear(clipboard);                                         
-  gtk_clipboard_set_text(clipboard, label, strlen(label));
-  
-}
-
-void clear_guesses(App *app){
-  GET_UI_ELEMENT(GtkBox, box_guesses);
-  
-  GList *children, *iter;
-  children = gtk_container_get_children(GTK_CONTAINER(box_guesses));
-  for(iter = children; iter != NULL; iter = g_list_next(iter))
-    gtk_widget_destroy(GTK_WIDGET(iter->data));
-  g_list_free(children);
-}
-
-void
-look_up (App *app) {
-  GtkWidget *button;
-  GList *list_guesses = process_strokes(app->strokes);
-   
-  //add guesses to the UI
-  GET_UI_ELEMENT(GtkBox, box_guesses);
-   
-  while (list_guesses){
-    unsigned char *c = list_guesses->data;
-     
-    unsigned char kanji[2];
-    sprintf(kanji, "%2x%2x", c[0], c[1]);
-
-    gchar *kanji_utf8 = utf8_for_char(c);
-       
-    button = gtk_button_new_with_label (kanji_utf8);
-
-    g_signal_connect (button, "clicked",
-		      G_CALLBACK (button_kanji_clicked), app);
-  
-    gtk_container_add(box_guesses, button);
-
-    gtk_widget_show (button);
-     
-    list_guesses = list_guesses->next;
-  }
-  
-}
-
 G_MODULE_EXPORT gboolean
 drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
 {
@@ -88,11 +9,12 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
   gint16 y;
   int i=1;
       
-  cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_set_line_width(cr, 2);
 
   //if a stroke is being drawn, draw lines between all points of the current stroke
   if(app->instroke){
+    gdk_cairo_set_source_rgba (cr, app->curstroke_color);
+    
     GList *point_list = app->curstroke;
     while (point_list){
       x = ((GdkPoint *)point_list->data)->x;
@@ -110,7 +32,9 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
     
     cairo_stroke(cr);
   }
-      
+
+  gdk_cairo_set_source_rgba (cr, app->strokes_color);
+  
   //draw lines between all points of all strokes
   stroke_list = app->strokes;
   while (stroke_list){
@@ -283,29 +207,6 @@ menuitem_annotate_toggled_cb(GtkWidget *widget, App *app) {
 G_MODULE_EXPORT gboolean
 menuitem_clear_activate_cb(GtkWidget *widget, App *app) {
   button_erase_clicked_cb(widget, app);
-}
-
-/**
-   remove the last stroke if any
-*/
-gboolean undo_stroke (App *app)
-{
-  if(!g_list_length(app->strokes) > 0){
-    return FALSE;
-  }
-    
-  GList *last_stroke = g_list_last(app->strokes);
-  app->strokes = g_list_remove (app->strokes, last_stroke->data);
-
-  //redraw the graph drawing area
-  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-  gtk_widget_queue_draw(drawingarea_kanji);
-
-  if(app->auto_look_up){
-    clear_guesses(app);
-    look_up(app);
-  }
-  
 }
 
 G_MODULE_EXPORT gboolean
