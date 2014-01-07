@@ -29,6 +29,7 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 
 * Remove some legacy Code from Kanjipad (datatype)
 * Color chooser menu for the strokes and background
+* background and stroke colors default values from system colors
 * set stroke width
 * Option to append several kanji in the clipboard / erase clipboard and push kanji (current)
 * Save settings
