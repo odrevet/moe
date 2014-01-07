@@ -33,6 +33,7 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 * set stroke width
 * Option to append several kanji in the clipboard / erase clipboard and push kanji (current)
 * Save settings
+* about dialog 
   
 <i>Credits for the Kanjipad and JStroke softwares goes to the original author 
 and contributors. </i>
