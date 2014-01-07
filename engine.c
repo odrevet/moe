@@ -1,35 +1,4 @@
-/* KanjiPad - Japanese handwriting recognition front end
- * Copyright (C) 1997 Owen Taylor
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-#include <ctype.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <glib.h>
-#include "jstroke/jstroke.h"
-
-#define MAX_STROKES 32
-#define BUFLEN 1024
-
-static char *stroke_dicts[MAX_STROKES];
-static char *progname;
-static char *data_file;
+#include "engine.h"
 
 void
 load_database()
@@ -37,12 +6,10 @@ load_database()
   FILE *file;
   int i;
 
-  if (data_file)
-    {
+  if (data_file){
       file = fopen (data_file, "rb");
-    }
-  else
-    {
+  }
+  else{
       char *dir = g_strdup ("./");  //KP_LIBDIR
       char *fname = g_build_filename (dir, "jdata.dat", NULL);
       file = fopen (fname, "rb");
@@ -56,8 +23,7 @@ load_database()
 
   if (!file)
     {
-      fprintf(stderr,"%s: Can't open %s\n", progname,
-	      data_file ? data_file : "jdata.dat");
+      fprintf(stderr,"Can't open %s\n", data_file ? data_file : "jdata.dat");
       exit(1);
     }
 
@@ -79,7 +45,7 @@ load_database()
 
       if ((n_read != 2) || (nstrokes > MAX_STROKES))
 	{
-	  fprintf(stderr, "%s: Corrupt stroke database\n", progname);
+	  fprintf(stderr, "Corrupted stroke database\n");
 	  exit(1);
 	}
 
@@ -91,7 +57,7 @@ load_database()
 
       if (n_read != len)
 	{
-	  fprintf(stderr, "%s: Corrupt stroke database", progname);
+	  fprintf(stderr, "Corrupted stroke database");
 	  exit(1);
 	}
     }
@@ -119,8 +85,8 @@ GList*
 process_strokes (GList *stroke_list)
 {
   RawStroke strokes[MAX_STROKES];
-  char *buffer = malloc(BUFLEN);
-  int buflen = BUFLEN;
+  char *buffer = malloc(BUFSIZ);
+  int buflen = BUFSIZ;
   int nstrokes = 0;
   GList* res = NULL;
 
