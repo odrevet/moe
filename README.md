@@ -29,17 +29,10 @@ So I rewrite it using GTK3, Glade and Cairo, keeping most of the engine as-is.
 
 * Remove some legacy Code from Kanjipad (datatype)
 * Undo functionnality
-* Annotate
-* Color menu
+* Color chooser menu for the strokes and background
+* set stroke width
 * Option to append several kanji in the clipboard / erase clipboard and push kanji (current)
-
-
-I need some help for:
-
-* Better drawing callback. Right now It's a bit laggy, as all the strokes are redrawn at each invalidate
-  It must have a better way (invalidate a rect like in kanjipad)
-* Add effects (brush, ...) using Cairo. 
-
+* Save settings
   
 <i>Credits for the Kanjipad and JStroke softwares goes to the original author 
 and contributors. </i>
