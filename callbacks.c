@@ -131,6 +131,7 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
   }
   cairo_stroke(cr);
   
+  
   gdk_cairo_set_source_rgba (cr, app->background_color);
   cairo_fill (cr);
 
@@ -181,17 +182,32 @@ drawingarea_kanji_button_release_event_cb(GtkWidget *widget,  GdkEventButton *ev
 
 G_MODULE_EXPORT gboolean
 drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event, App *app)  {
-  GdkPoint *p;
+  GdkPoint *current_point;
 
   if(app->instroke && event->state & GDK_BUTTON1_MASK){
-    p = g_new (GdkPoint, 1);
-    p->x = event->x;
-    p->y = event->y;
-    app->curstroke = g_list_append (app->curstroke, p);
+    current_point = g_new (GdkPoint, 1);
+    current_point->x = event->x;
+    current_point->y = event->y;
 
-    //redraw the graph drawing area
+    //get the last point before inserting the current one
+    //in order to know where to partially redraw
+    GdkPoint *last_point = g_list_last(app->curstroke)->data;
+      
+    app->curstroke = g_list_append (app->curstroke, current_point);
+
+    //partially redraw the kanji drawing area,between the prev x y to current x y
+    gint draw_x, draw_y, draw_width, draw_height;
+
+    //set the top left point of the rect to redraw
+    gint line_width = 2;
+    draw_x = (current_point->x < last_point->x ? current_point->x : last_point->x) - line_width; 
+    draw_y = (current_point->y < last_point->y ? current_point->y : last_point->y) - line_width;
+    draw_width = abs(current_point->x - last_point->x) + line_width;
+    draw_height = abs(current_point->y - last_point->y) + line_width;
+      
     GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-    gtk_widget_queue_draw(drawingarea_kanji);
+    //gtk_widget_queue_draw(drawingarea_kanji);
+    gtk_widget_queue_draw_area(drawingarea_kanji, draw_x, draw_y, draw_width, draw_height);
 
   }
 
