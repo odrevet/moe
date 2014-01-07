@@ -51,31 +51,31 @@ void clear_guesses(App *app){
 
 void
 look_up (App *app) {
-   GtkWidget *button;
-   GList *list_guesses = process_strokes(app->strokes);
+  GtkWidget *button;
+  GList *list_guesses = process_strokes(app->strokes);
    
-   //add guesses to the UI
-   GET_UI_ELEMENT(GtkBox, box_guesses);
+  //add guesses to the UI
+  GET_UI_ELEMENT(GtkBox, box_guesses);
    
-   while (list_guesses){
-     unsigned char *c = list_guesses->data;
+  while (list_guesses){
+    unsigned char *c = list_guesses->data;
      
-     unsigned char kanji[2];
-     sprintf(kanji, "%2x%2x", c[0], c[1]);
+    unsigned char kanji[2];
+    sprintf(kanji, "%2x%2x", c[0], c[1]);
 
-     gchar *kanji_utf8 = utf8_for_char(c);
+    gchar *kanji_utf8 = utf8_for_char(c);
        
-     button = gtk_button_new_with_label (kanji_utf8);
+    button = gtk_button_new_with_label (kanji_utf8);
 
-     g_signal_connect (button, "clicked",
-		       G_CALLBACK (button_kanji_clicked), app);
+    g_signal_connect (button, "clicked",
+		      G_CALLBACK (button_kanji_clicked), app);
   
-     gtk_container_add(box_guesses, button);
+    gtk_container_add(box_guesses, button);
 
-     gtk_widget_show (button);
+    gtk_widget_show (button);
      
-     list_guesses = list_guesses->next;
-   }
+    list_guesses = list_guesses->next;
+  }
   
 }
 
@@ -285,3 +285,30 @@ menuitem_clear_activate_cb(GtkWidget *widget, App *app) {
   button_erase_clicked_cb(widget, app);
 }
 
+/**
+   remove the last stroke if any
+*/
+gboolean undo_stroke (App *app)
+{
+  if(!g_list_length(app->strokes) > 0){
+    return FALSE;
+  }
+    
+  GList *last_stroke = g_list_last(app->strokes);
+  app->strokes = g_list_remove (app->strokes, last_stroke->data);
+
+  //redraw the graph drawing area
+  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
+  gtk_widget_queue_draw(drawingarea_kanji);
+
+  if(app->auto_look_up){
+    clear_guesses(app);
+    look_up(app);
+  }
+  
+}
+
+G_MODULE_EXPORT gboolean
+button_undo_clicked_cb(GtkWidget *widget, App *app) {
+  undo_stroke(app);
+}
