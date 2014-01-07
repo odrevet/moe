@@ -16,10 +16,11 @@ typedef struct app_
 {
   GtkBuilder *definitions;
   GSList *objects;
+
+  cairo_surface_t *surface;  //back buffer
     
   GdkRGBA *background_color;
   GdkRGBA *strokes_color;
-  GdkRGBA *curstroke_color;
 
   gint stroke_size;
   
@@ -28,7 +29,6 @@ typedef struct app_
 
   GList *strokes;     //list of strokes
   GList *curstroke;   //list of points
-  gboolean instroke;  //a stroke is begin drawn
   
 } App;
     
@@ -52,4 +52,8 @@ undo_stroke (App *app);
 void
 button_kanji_clicked (GtkWidget *widget, App *app);
 
+void
+drawingarea_reinit(GtkWidget *widget, App *app);
+
+void draw_all_strokes(cairo_t *cr, App *app);
 #endif

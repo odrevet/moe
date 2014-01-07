@@ -25,7 +25,6 @@ app_init_colors (App * app)
 {
   app->background_color = g_new0 (GdkRGBA, 1);
   app->strokes_color = g_new0 (GdkRGBA, 1);
-  app->curstroke_color = g_new0 (GdkRGBA, 1);
   
   //if no custom colors saved, fetch system colors
   GET_UI_ELEMENT (GtkWidget, window1);
@@ -39,10 +38,6 @@ app_init_colors (App * app)
   gtk_style_context_get_color(context,
 			      GTK_STATE_FLAG_NORMAL,
 			      app->strokes_color);
-
-  gtk_style_context_get_background_color(context,
-					 GTK_STATE_FLAG_SELECTED,
-					 app->curstroke_color);
 }
     
 void
@@ -66,20 +61,20 @@ app_init (App * app)
   gtk_builder_connect_signals (app->definitions, app);
     
   app->objects = gtk_builder_get_objects (app->definitions);
-
-  app->instroke = FALSE;
   
   app->annotate = FALSE;
   app->auto_look_up = TRUE;
-  
+
+  app->surface = NULL;
+    
   app_init_colors (app);
 
-  app->stroke_size = 2;
+  app->stroke_size = 2;  //TODO settings
 
   //Set the guesses results font and size
   GET_UI_ELEMENT(GtkBox, box_guesses);
   PangoFontDescription    *fd = NULL;
-  fd = pango_font_description_from_string ("Monospace 16");
+  fd = pango_font_description_from_string ("Monospace 20");  //TODO settings
   gtk_widget_modify_font (box_guesses, fd);
  
   load_database();
@@ -152,6 +147,56 @@ look_up (App *app)
   
 }
 
+void draw_all_strokes(cairo_t *cr, App *app){
+  guint width, height;
+  GList *stroke_list;
+  gint16 x;
+  gint16 y;
+  int i=1;
+      
+  cairo_set_line_width(cr, app->stroke_size);
+  gdk_cairo_set_source_rgba (cr, app->strokes_color);
+  
+  //draw lines between all points of all strokes
+  stroke_list = app->strokes;
+  while (stroke_list){
+    GList *point_list = stroke_list->data;
+
+    //if annotate, display the stroke number near the first point
+    if(app->annotate){
+      x = ((GdkPoint *)point_list->data)->x;
+      y = ((GdkPoint *)point_list->data)->y;
+    
+
+      cairo_move_to(cr, x - 10, y - 10);
+      gchar stroke_number[2];             //no kanji stroke count with more than 2 digits
+      sprintf(stroke_number, "%d", i);
+      cairo_show_text(cr, stroke_number);
+    }
+    
+    while (point_list){
+
+      x = ((GdkPoint *)point_list->data)->x;
+      y = ((GdkPoint *)point_list->data)->y;
+      
+      cairo_move_to(cr, x, y);
+      point_list = point_list->next;
+
+      if(point_list){
+	x = ((GdkPoint *)point_list->data)->x;
+        y = ((GdkPoint *)point_list->data)->y;
+        cairo_line_to(cr, x, y);
+      }
+    }
+    stroke_list = stroke_list->next;
+    i++;
+  }
+  cairo_stroke(cr);
+
+  return FALSE;  
+}
+
+
 gboolean
 undo_stroke (App *app)
 {
@@ -161,16 +206,14 @@ undo_stroke (App *app)
     
   GList *last_stroke = g_list_last(app->strokes);
   app->strokes = g_list_remove (app->strokes, last_stroke->data);
-
-  //redraw the graph drawing area
-  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-  gtk_widget_queue_draw(drawingarea_kanji);
-
+  
   if(app->auto_look_up){
     clear_guesses(app);
     look_up(app);
   }
   
+
+  return TRUE;
 }
 
 void
@@ -186,4 +229,38 @@ button_kanji_clicked (GtkWidget *widget, App *app)
   gtk_clipboard_clear(clipboard);                                         
   gtk_clipboard_set_text(clipboard, label, strlen(label));
   
+}
+
+void drawingarea_reinit(GtkWidget *widget, App *app){
+  GtkAllocation allocation;
+  cairo_t *cr;
+
+  if (app->surface)
+    cairo_surface_destroy (app->surface);
+
+  gtk_widget_get_allocation (widget, &allocation);
+  app->surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
+                                               CAIRO_CONTENT_COLOR,
+                                               allocation.width,
+                                               allocation.height);
+
+  cr = cairo_create (app->surface);
+
+  //background color
+  gdk_cairo_set_source_rgba (cr, app->background_color);
+  cairo_paint (cr);
+
+  //redraw all strokes previously drawn
+
+  cairo_rectangle(cr, 20, 20, 120, 80);
+  cairo_rectangle(cr, 180, 20, 80, 80);
+  cairo_stroke_preserve(cr);
+  cairo_fill(cr);
+  
+  draw_all_strokes(cr, app);
+
+    
+  cairo_destroy (cr);
+
+  return TRUE;
 }
