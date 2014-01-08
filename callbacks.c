@@ -1,7 +1,7 @@
 #include "app.h"
 
 
-/* Create a new surface of the appropriate size to store our scribbles */
+//Drawing area callbacks 
 G_MODULE_EXPORT gboolean
 drawingarea_kanji_configure_event_cb(GtkWidget         *widget,
 				     GdkEventConfigure *event,
@@ -10,7 +10,6 @@ drawingarea_kanji_configure_event_cb(GtkWidget         *widget,
   drawingarea_reinit(widget, app);
   return TRUE;
 }
-
 
 
 G_MODULE_EXPORT gboolean
@@ -25,13 +24,9 @@ drawingarea_kanji_draw_cb (GtkWidget *widget, cairo_t *cr, App *app)
 G_MODULE_EXPORT gboolean
 drawingarea_kanji_button_press_event_cb(GtkWidget *widget, GdkEventButton *event, App *app)
 {
-  //if the mouse left button is pressed, create a new point at coord and append it to the stroke list
-  if (event->button == 1){
-    GdkPoint *p = g_new (GdkPoint, 1);
-    p->x = event->x;
-    p->y = event->y;
-    app->curstroke = g_list_append (app->curstroke, p);
-  }
+  //if the mouse left button is pressed, create a new point at coord and append
+  //it to the stroke list
+  if (event->button == 1)register_coord(event->x, event->y, app);
 
   return FALSE;
 }
@@ -42,6 +37,20 @@ drawingarea_kanji_button_release_event_cb(GtkWidget *widget,  GdkEventButton *ev
   //append the current stroke to the stroke list
   app->strokes = g_list_append (app->strokes, app->curstroke);
 
+    //if annotate, display the stroke number near the first point
+    if(app->annotate){  
+
+      gint16 x = ((GdkPoint *)app->curstroke->data)->x;
+      gint16 y = ((GdkPoint *)app->curstroke->data)->y;
+    
+
+      cairo_move_to(app->surface, x - 10, y - 10);
+      gchar stroke_number[2];         //no kanji stroke count with more than 2 digits
+      sprintf(stroke_number, "%d", 9);
+      cairo_show_text(app->surface, stroke_number);
+      drawing_area_refresh(app);
+    }
+    
   //finished to draw the stroke
   app->curstroke = NULL;
 
@@ -55,7 +64,6 @@ drawingarea_kanji_button_release_event_cb(GtkWidget *widget,  GdkEventButton *ev
 }
 
 
-
 G_MODULE_EXPORT gboolean
 drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event, App *app)  {
   int x, y;
@@ -66,28 +74,17 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
 
   gdk_window_get_device_position (event->window, event->device, &x, &y, &state);
 
-  GdkPoint *current_point;
-
   if(event->state & GDK_BUTTON1_MASK){
-    current_point = g_new (GdkPoint, 1);
-    current_point->x = x;
-    current_point->y = y;
-
-    //get the last point before inserting the current one
-    //in order to know where to partially redraw
-    GdkPoint *last_point = g_list_last(app->curstroke)->data;
-      
-    app->curstroke = g_list_append (app->curstroke, current_point);
-
+    
     //partially redraw the kanji drawing area,between the prev x y to current x y
     //set the top left point of the rect to redraw
     GdkRectangle update_rect;
     gint line_width = app->stroke_size;
     
-    update_rect.x = (current_point->x < last_point->x ? current_point->x : last_point->x) - line_width / 2; 
-    update_rect.y = (current_point->y < last_point->y ? current_point->y : last_point->y) - line_width / 2;
-    update_rect.width = abs(current_point->x - last_point->x) + line_width;
-    update_rect.height = abs(current_point->y - last_point->y) + line_width;
+    update_rect.x = (x < last_point->x ? x : last_point->x) - line_width / 2; 
+    update_rect.y = (y < last_point->y ? y : last_point->y) - line_width / 2;
+    update_rect.width = abs(x - last_point->x) + line_width;
+    update_rect.height = abs(y - last_point->y) + line_width;
 
     /* Paint to the surface, where we store our state */
     cairo_t *cr = cairo_create (app->surface);
@@ -100,7 +97,9 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
     cairo_stroke(cr);
 
     //DEBUG: draw invalidation rect
-    /*cairo_rectangle(cr, update_rect.x, update_rect.y, update_rect.width, update_rect.height);
+    /*GdkRGBA debug_color = {1, 0, 0, 1}; 
+    gdk_cairo_set_source_rgba (cr, &debug_color);
+    cairo_rectangle(cr, update_rect.x, update_rect.y, update_rect.width, update_rect.height);
     cairo_set_line_width(cr, 1);
     cairo_stroke(cr);*/
   
@@ -111,14 +110,17 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
 				&update_rect,
 				FALSE);
 
+
+    // finished drawing, now register the point to the core structures
+    register_coord(x, y, app);
   }
 
   return TRUE;
 }
 
-/////////////////////////
 
 
+//Button callbacks
 /**
    free all strokes
 */
@@ -143,6 +145,14 @@ button_erase_clicked_cb(GtkWidget *widget, App *app)  {
 }
 
 G_MODULE_EXPORT gboolean
+button_undo_clicked_cb(GtkWidget *widget, App *app) {
+  undo_stroke(app);
+  drawing_area_refresh(app);
+}
+
+
+//Menu callbacks
+G_MODULE_EXPORT gboolean
 menuitem_auto_lookup_toggled_cb(GtkWidget *widget, App *app) {
   gboolean autolookup = gtk_check_menu_item_get_active(widget);
   app->auto_look_up = autolookup;
@@ -157,21 +167,17 @@ menuitem_lookup_activate_cb(GtkWidget *widget, App *app) {
 G_MODULE_EXPORT gboolean
 menuitem_annotate_toggled_cb(GtkWidget *widget, App *app) {
   gboolean annotate = gtk_check_menu_item_get_active(widget);
-  app->annotate = annotate; 
+  app->annotate = annotate;
+
+  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
+  drawingarea_reinit(drawingarea_kanji, app);
+  gtk_widget_queue_draw(drawingarea_kanji);    
+ 
 }
 
 G_MODULE_EXPORT gboolean
 menuitem_clear_activate_cb(GtkWidget *widget, App *app) {
   button_erase_clicked_cb(widget, app);
-}
-
-G_MODULE_EXPORT gboolean
-button_undo_clicked_cb(GtkWidget *widget, App *app) {
-  undo_stroke(app);
-
-  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-  drawingarea_reinit(drawingarea_kanji, app);
-  gtk_widget_queue_draw(drawingarea_kanji);  
 }
 
 G_MODULE_EXPORT gboolean
@@ -206,15 +212,11 @@ button_ok_clicked_cb(GtkWidget *widget, App *app) {
 G_MODULE_EXPORT gboolean
 colorbutton_background_color_set_cb(GtkWidget *widget, App *app) {
   gtk_color_chooser_get_rgba(widget, app->background_color);
-  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-  drawingarea_reinit(drawingarea_kanji, app);
-  gtk_widget_queue_draw(drawingarea_kanji);    
+  drawing_area_refresh(app);
 }
 
 G_MODULE_EXPORT gboolean
 colorbutton_strokes_color_set_cb(GtkWidget *widget, App *app) {
   gtk_color_chooser_get_rgba(widget, app->strokes_color);
-  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
-  drawingarea_reinit(drawingarea_kanji, app);
-  gtk_widget_queue_draw(drawingarea_kanji);    
+  drawing_area_refresh(app);   
 }

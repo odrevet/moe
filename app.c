@@ -59,8 +59,12 @@ app_init (App * app)
   }
     
   gtk_builder_connect_signals (app->definitions, app);
-    
   app->objects = gtk_builder_get_objects (app->definitions);
+
+
+  //
+
+  // app->settings = g_settings_new("apps.moe");
   
   app->annotate = FALSE;
   app->auto_look_up = TRUE;
@@ -76,7 +80,10 @@ app_init (App * app)
   PangoFontDescription    *fd = NULL;
   fd = pango_font_description_from_string ("Monospace 20");  //TODO settings
   gtk_widget_modify_font (box_guesses, fd);
- 
+
+
+
+  
   load_database();
 }
 
@@ -147,7 +154,17 @@ look_up (App *app)
   
 }
 
-void draw_all_strokes(cairo_t *cr, App *app){
+inline void
+register_coord(gint16 x, gint16 y, App *app){
+    GdkPoint *p = g_new (GdkPoint, 1);
+    p->x = x;
+    p->y = y;
+    app->curstroke = g_list_append (app->curstroke, p);
+    last_point = g_list_last(app->curstroke)->data;
+}
+
+void
+draw_all_strokes(cairo_t *cr, App *app){
   guint width, height;
   GList *stroke_list;
   gint16 x;
@@ -254,7 +271,6 @@ void drawingarea_reinit(GtkWidget *widget, App *app){
 
   cairo_rectangle(cr, 20, 20, 120, 80);
   cairo_rectangle(cr, 180, 20, 80, 80);
-  cairo_stroke_preserve(cr);
   cairo_fill(cr);
   
   draw_all_strokes(cr, app);
@@ -262,5 +278,14 @@ void drawingarea_reinit(GtkWidget *widget, App *app){
     
   cairo_destroy (cr);
 
+
+  
   return TRUE;
+}
+
+
+void drawing_area_refresh(App *app){
+  GET_UI_ELEMENT(GtkDrawingArea, drawingarea_kanji);
+  drawingarea_reinit(drawingarea_kanji, app);
+  gtk_widget_queue_draw(drawingarea_kanji);    
 }
