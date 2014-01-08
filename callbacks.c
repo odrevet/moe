@@ -37,20 +37,6 @@ drawingarea_kanji_button_release_event_cb(GtkWidget *widget,  GdkEventButton *ev
   //append the current stroke to the stroke list
   app->strokes = g_list_append (app->strokes, app->curstroke);
 
-    //if annotate, display the stroke number near the first point
-    if(app->annotate){  
-
-      gint16 x = ((GdkPoint *)app->curstroke->data)->x;
-      gint16 y = ((GdkPoint *)app->curstroke->data)->y;
-    
-
-      cairo_move_to(app->surface, x - 10, y - 10);
-      gchar stroke_number[2];         //no kanji stroke count with more than 2 digits
-      sprintf(stroke_number, "%d", 9);
-      cairo_show_text(app->surface, stroke_number);
-      drawing_area_refresh(app);
-    }
-    
   //finished to draw the stroke
   app->curstroke = NULL;
 
@@ -59,6 +45,12 @@ drawingarea_kanji_button_release_event_cb(GtkWidget *widget,  GdkEventButton *ev
     clear_guesses(app);
     look_up(app);
   }
+
+  //if annotate, display the stroke number near the first point
+  if(app->annotate){  
+      drawing_area_refresh(app);
+  }
+
     
   return FALSE;
 }
@@ -111,7 +103,7 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
 				FALSE);
 
 
-    // finished drawing, now register the point to the core structures
+    // finished drawing, now register the point
     register_coord(x, y, app);
   }
 
@@ -183,15 +175,7 @@ menuitem_clear_activate_cb(GtkWidget *widget, App *app) {
 G_MODULE_EXPORT gboolean
 menuitem_preferences_activate_cb(GtkWidget *widget, App *app) {
   GET_UI_ELEMENT(GtkDialog, dialog_settings);
-  gint result = gtk_dialog_run(dialog_settings);
-
-  switch (result){
-  case GTK_RESPONSE_ACCEPT:
-    break;
-  default:
-    
-    break;
-  }
+  gtk_dialog_run(dialog_settings);
   gtk_widget_hide (dialog_settings);  
 }
 
@@ -206,7 +190,8 @@ imagemenuitem_about_activate_cb(GtkWidget *widget, App *app) {
 // Settings dialogue
 G_MODULE_EXPORT gboolean
 button_ok_clicked_cb(GtkWidget *widget, App *app) {
-  
+  GET_UI_ELEMENT(GtkDialog, dialog_settings);
+  gtk_widget_hide (dialog_settings);   
 }
 
 G_MODULE_EXPORT gboolean
@@ -219,4 +204,15 @@ G_MODULE_EXPORT gboolean
 colorbutton_strokes_color_set_cb(GtkWidget *widget, App *app) {
   gtk_color_chooser_get_rgba(widget, app->strokes_color);
   drawing_area_refresh(app);   
+}
+
+G_MODULE_EXPORT gboolean
+fontbutton_guesses_font_set_cb(GtkWidget *widget, App *app) {
+
+  gchar* font_name = gtk_font_button_get_font_name(widget);
+    
+  GET_UI_ELEMENT(GtkBox, box_guesses);
+  PangoFontDescription    *fd = NULL;
+  fd = pango_font_description_from_string (font_name);
+  gtk_widget_modify_font (box_guesses, fd);
 }

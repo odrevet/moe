@@ -26,7 +26,7 @@ app_init_colors (App * app)
   app->background_color = g_new0 (GdkRGBA, 1);
   app->strokes_color = g_new0 (GdkRGBA, 1);
   
-  //if no custom colors saved, fetch system colors
+  //fetch system colors
   GET_UI_ELEMENT (GtkWidget, window1);
   GtkStyleContext *context;
   context = gtk_widget_get_style_context (window1);
@@ -61,10 +61,6 @@ app_init (App * app)
   gtk_builder_connect_signals (app->definitions, app);
   app->objects = gtk_builder_get_objects (app->definitions);
 
-
-  //
-
-  // app->settings = g_settings_new("apps.moe");
   
   app->annotate = FALSE;
   app->auto_look_up = TRUE;
@@ -72,15 +68,19 @@ app_init (App * app)
   app->surface = NULL;
     
   app_init_colors (app);
-
-  app->stroke_size = 2;  //TODO settings
+  
+  app->stroke_size = DEFAULT_STROKE_SIZE;
 
   //Set the guesses results font and size
   GET_UI_ELEMENT(GtkBox, box_guesses);
   PangoFontDescription    *fd = NULL;
-  fd = pango_font_description_from_string ("Monospace 20");  //TODO settings
-  gtk_widget_modify_font (box_guesses, fd);
+  fd = pango_font_description_from_string (DEFAULT_GUESSES_FONT);
+  gtk_widget_override_font (box_guesses, fd);
 
+
+  //initialise the settings components with the current values
+  GET_UI_ELEMENT(GtkFontButton, fontbutton_guesses);
+  gtk_font_button_set_font_name(fontbutton_guesses, DEFAULT_GUESSES_FONT);
 
 
   
@@ -268,17 +268,9 @@ void drawingarea_reinit(GtkWidget *widget, App *app){
   cairo_paint (cr);
 
   //redraw all strokes previously drawn
-
-  cairo_rectangle(cr, 20, 20, 120, 80);
-  cairo_rectangle(cr, 180, 20, 80, 80);
-  cairo_fill(cr);
-  
   draw_all_strokes(cr, app);
 
-    
   cairo_destroy (cr);
-
-
   
   return TRUE;
 }

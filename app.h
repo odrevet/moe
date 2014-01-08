@@ -13,6 +13,10 @@
     app_get_ui_element(app, #ELEMENT);
 
 
+
+#define DEFAULT_STROKE_SIZE 2
+#define DEFAULT_GUESSES_FONT "Monospace 20"
+
 //keeping a global track of the last point drawn
 //to avoid to search it in drawing callback functions
 GdkPoint *last_point;
