@@ -50,7 +50,7 @@ GObject * app_get_ui_element (App * , const gchar * );
 static gchar *
 utf8_for_char (unsigned char ch[2]);
 
-inline void
+void
 register_coord(gint16 x, gint16 y, App *app);
   
 void

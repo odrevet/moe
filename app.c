@@ -154,7 +154,7 @@ look_up (App *app)
   
 }
 
-inline void
+void
 register_coord(gint16 x, gint16 y, App *app){
     GdkPoint *p = g_new (GdkPoint, 1);
     p->x = x;
