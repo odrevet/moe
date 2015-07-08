@@ -5,7 +5,7 @@ CC=gcc
 CPPFLAGS= -DFOR_PILOT_COMPAT
 OUT=moe
 
-main: main.o app.o callbacks.o engine.o util.o scoring.o 
+main: main.o callbacks.o engine.o util.o scoring.o app.o
 	$(CC) -o $(OUT) $^ $(LDLIBS) $(CPPFLAGS)
 
 scoring.o: jstroke/scoring.c
