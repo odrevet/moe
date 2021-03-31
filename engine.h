@@ -1,6 +1,6 @@
 #ifndef ENGINE
 #define ENGINE
-    
+
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,11 +16,9 @@
 static char *stroke_dicts[MAX_STROKES];
 static char *data_file;
 
-void
-load_database();
+void load_database();
 
-GList*
-process_strokes (GList *stroke_list);
-
+GList *
+process_strokes(GList *stroke_list);
 
 #endif
