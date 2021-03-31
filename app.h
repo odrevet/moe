@@ -13,10 +13,6 @@
 #define DEFAULT_STROKE_SIZE 2
 #define DEFAULT_GUESSES_FONT "Monospace 20"
 
-//keeping a global track of the last point drawn
-//to avoid to search it in drawing callback functions
-GdkPoint *last_point;
-
 typedef struct app_
 {
   GtkBuilder *definitions;
@@ -37,13 +33,15 @@ typedef struct app_
   GList *strokes;   //list of strokes
   GList *curstroke; //list of points
 
+  //keeping a global track of the last point drawn
+  //to avoid to search it in drawing callback functions
+  GdkPoint *last_point;
 } App;
 
 void app_init(App *);
 GObject *app_get_ui_element(App *, const gchar *);
 
-static gchar *
-utf8_for_char(unsigned char ch[2]);
+static gchar *utf8_for_char(unsigned char ch[2]);
 
 void register_coord(gint16 x, gint16 y, App *app);
 
@@ -51,8 +49,7 @@ void clear_guesses(App *app);
 
 void look_up(App *app);
 
-gboolean
-undo_stroke(App *app);
+gboolean undo_stroke(App *app);
 
 void button_kanji_clicked(GtkWidget *widget, App *app);
 

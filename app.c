@@ -1,7 +1,6 @@
 #include "app.h"
 
-GObject *
-app_get_ui_element(App *app, const gchar *name)
+GObject *app_get_ui_element(App *app, const gchar *name)
 {
   const gchar *s;
   GSList *list;
@@ -85,8 +84,7 @@ void app_init(App *app)
 
 //Utils and core functions
 
-static gchar *
-utf8_for_char(unsigned char ch[2])
+static gchar *utf8_for_char(unsigned char ch[2])
 {
   gchar *string_utf;
   GError *err = NULL;
@@ -154,7 +152,7 @@ void register_coord(gint16 x, gint16 y, App *app)
   p->x = x;
   p->y = y;
   app->curstroke = g_list_append(app->curstroke, p);
-  last_point = g_list_last(app->curstroke)->data;
+  app->last_point = g_list_last(app->curstroke)->data;
 }
 
 void draw_all_strokes(cairo_t *cr, App *app)
@@ -210,8 +208,7 @@ void draw_all_strokes(cairo_t *cr, App *app)
   return FALSE;
 }
 
-gboolean
-undo_stroke(App *app)
+gboolean undo_stroke(App *app)
 {
   if (!g_list_length(app->strokes) > 0)
   {

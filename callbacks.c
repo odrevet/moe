@@ -74,10 +74,10 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
     GdkRectangle update_rect;
     gint line_width = app->stroke_size;
 
-    update_rect.x = (x < last_point->x ? x : last_point->x) - line_width / 2;
-    update_rect.y = (y < last_point->y ? y : last_point->y) - line_width / 2;
-    update_rect.width = abs(x - last_point->x) + line_width;
-    update_rect.height = abs(y - last_point->y) + line_width;
+    update_rect.x = (x < app->last_point->x ? x : app->last_point->x) - line_width / 2;
+    update_rect.y = (y < app->last_point->y ? y : app->last_point->y) - line_width / 2;
+    update_rect.width = abs(x - app->last_point->x) + line_width;
+    update_rect.height = abs(y - app->last_point->y) + line_width;
 
     /* Paint to the surface, where we store our state */
     cairo_t *cr = cairo_create(app->surface);
@@ -85,7 +85,7 @@ drawingarea_kanji_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
     //line
     cairo_set_line_width(cr, line_width);
     gdk_cairo_set_source_rgba(cr, app->strokes_color);
-    cairo_move_to(cr, last_point->x, last_point->y);
+    cairo_move_to(cr, app->last_point->x, app->last_point->y);
     cairo_line_to(cr, x, y);
     cairo_stroke(cr);
 
